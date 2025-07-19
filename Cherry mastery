@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.07"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.08"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -286,6 +286,7 @@ cherryModeDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
 cherryModeDropdown.TextSize = 14
 cherryModeDropdown.Font = Enum.Font.Gotham
 cherryModeDropdown.BorderSizePixel = 0
+cherryModeDropdown.ZIndex = 20  -- 設定較高的ZIndex
 Instance.new("UICorner", cherryModeDropdown).CornerRadius = UDim.new(0, 6)
 
 -- 攻擊模式選項框架
@@ -295,6 +296,7 @@ cherryModeOptions.Position = UDim2.new(0.5, -90, 0, 80)
 cherryModeOptions.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 cherryModeOptions.BorderSizePixel = 0
 cherryModeOptions.Visible = false
+cherryModeOptions.ZIndex = 25  -- 設定最高的ZIndex，確保在最上層
 Instance.new("UICorner", cherryModeOptions).CornerRadius = UDim.new(0, 6)
 
 -- 製造分身+讓分身攻擊模式選項
@@ -306,6 +308,7 @@ cloneOption.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
 cloneOption.TextColor3 = Color3.fromRGB(255, 255, 255)
 cloneOption.TextSize = 12
 cloneOption.Font = Enum.Font.Gotham
+cloneOption.ZIndex = 26  -- 確保在父框架之上
 cloneOption.BorderSizePixel = 0
 
 -- 本體攻擊模式選項
@@ -317,6 +320,7 @@ bodyOption.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
 bodyOption.TextColor3 = Color3.fromRGB(255, 255, 255)
 bodyOption.TextSize = 12
 bodyOption.Font = Enum.Font.Gotham
+bodyOption.ZIndex = 26  -- 確保在父框架之上
 bodyOption.BorderSizePixel = 0
 
 -- 攻擊模式下拉選單功能
