@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.07"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.08"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -245,7 +245,13 @@ local function styleScrollFrame(scrollFrame)
 end
 
 
--- 櫻桃精通分區腳本
+
+Section6.MouseButton1Click:Connect(function()
+    barrierSection.Visible = false
+    cherrySection.Visible = true
+end)
+
+- 櫻桃精通分區腳本
 
 -- 創建櫻桃分區按鈕
 local Section6 = createSectionButton("櫻桃精通", 2, SideBar)
@@ -289,7 +295,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                     game:GetService("ReplicatedStorage").GeneralAbility:FireServer()
                 end)
                 
-                -- 每0.5秒執行分身
+                -- 每0.7秒執行分身攻擊（統一間隔）
                 local startTime = tick()
                 while isCherryAutoEnabled and (tick() - startTime < 5) do
                     pcall(function()
@@ -303,10 +309,10 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                             end
                         end
                     end)
-                    task.wait(0.5)
+                    task.wait(0.7) -- 分身攻擊間隔改為0.7秒
                 end
                 
-                -- 每1秒攻擊7單位內最近玩家
+                -- 每0.7秒攻擊7單位內最近玩家
                 task.spawn(function()
                     while isCherryAutoEnabled do
                         pcall(function()
@@ -335,7 +341,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                                 game:GetService("ReplicatedStorage").GeneralHit:FireServer(unpack(args))
                             end
                         end)
-                        task.wait(1)
+                        task.wait(0.7)
                     end
                 end)
                 
@@ -520,21 +526,21 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                     else -- 第三、四任務
                         -- 找到目標櫻桃手套
                         targetObject = findTargetGlove(targetName)
-                        moveOffset = 0 -- 直接到手套位置
+                        moveOffset = 0 -- 直接到手套位置，不偏移
                         waitInterval = 0 -- 間隔時間為0
                     end
                     
                     -- 在找到目標後立即移動
                     if targetObject and isCherryHelpEnabled then
                         pcall(function()
-                            if moveOffset > 0 and targetObject.Parent:FindFirstChild("HumanoidRootPart") then
+                            if cherryHelpMode == "第一、二任務" and moveOffset > 0 and targetObject.Parent:FindFirstChild("HumanoidRootPart") then
                                 -- 移動到目標面前
                                 local targetPos = targetObject.Position
                                 local targetLookDirection = targetObject.CFrame.LookVector
                                 local newPos = targetPos + (targetLookDirection * moveOffset)
                                 humanoidRootPart.CFrame = CFrame.new(newPos, targetPos)
                             else
-                                -- 直接移動到目標位置
+                                -- 直接移動到目標位置（第三、四任務）
                                 local targetPos = targetObject.Position
                                 humanoidRootPart.CFrame = CFrame.new(targetPos)
                             end
@@ -551,57 +557,58 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                             
                             -- 檢查ragdoll狀態
                             if isInRagdoll(character) then
-                                task.wait(0.5) -- 等待0.5秒
-                                
-                                -- 安全傳送到指定坐標
-                                pcall(function()
-                                    if humanoidRootPart and humanoidRootPart.Parent then
-                                        humanoidRootPart.CFrame = CFrame.new(263, 13, 197)
-                                    end
-                                end)
-                                
-                                task.wait(0.2)
-                                
-                                -- 安全重置
-                                pcall(function()
-                                    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                                        LocalPlayer.Character.Humanoid:TakeDamage(LocalPlayer.Character.Humanoid.MaxHealth)
-                                    end
-                                end)
-                                
-                                -- 等待重置完成和新角色載入
-                                local resetStartTime = tick()
-                                repeat
+                                if cherryHelpMode == "第一、二任務" then
+                                    -- 第一、二任務：執行重置流程
+                                    task.wait(0.5) -- 等待0.5秒
+                                    
+                                    -- 安全傳送到指定坐標
+                                    pcall(function()
+                                        if humanoidRootPart and humanoidRootPart.Parent then
+                                            humanoidRootPart.CFrame = CFrame.new(263, 13, 197)
+                                        end
+                                    end)
+                                    
                                     task.wait(0.2)
-                                    if tick() - resetStartTime > 3 then
-                                        break
-                                    end
-                                until not LocalPlayer.Character or LocalPlayer.Character.Humanoid.Health <= 0
-                                
-                                -- 等待新角色
-                                local newCharacter = nil
-                                local waitStartTime = tick()
-                                repeat
-                                    task.wait(0.2)
-                                    newCharacter = LocalPlayer.Character
-                                    if tick() - waitStartTime > 3 then
-                                        break
-                                    end
-                                until newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") and 
-                                      newCharacter:FindFirstChild("Humanoid") and newCharacter.Humanoid.Health > 0
-                                
-                                -- 傳送到紅門並等待0.5秒
-                                pcall(function()
-                                    local teleport1 = Workspace.Lobby:FindFirstChild("Teleport1")
-                                    if teleport1 and newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") then
-                                        newCharacter.HumanoidRootPart.CFrame = teleport1.CFrame
-                                        task.wait(0.5)
-                                    end
-                                end)
-                                
-                                -- 重新找到目標並移動
-                                pcall(function()
-                                    if cherryHelpMode == "第一、二任務" then
+                                    
+                                    -- 安全重置
+                                    pcall(function()
+                                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                                            LocalPlayer.Character.Humanoid:TakeDamage(LocalPlayer.Character.Humanoid.MaxHealth)
+                                        end
+                                    end)
+                                    
+                                    -- 等待重置完成和新角色載入
+                                    local resetStartTime = tick()
+                                    repeat
+                                        task.wait(0.2)
+                                        if tick() - resetStartTime > 3 then
+                                            break
+                                        end
+                                    until not LocalPlayer.Character or LocalPlayer.Character.Humanoid.Health <= 0
+                                    
+                                    -- 等待新角色
+                                    local newCharacter = nil
+                                    local waitStartTime = tick()
+                                    repeat
+                                        task.wait(0.2)
+                                        newCharacter = LocalPlayer.Character
+                                        if tick() - waitStartTime > 3 then
+                                            break
+                                        end
+                                    until newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") and 
+                                          newCharacter:FindFirstChild("Humanoid") and newCharacter.Humanoid.Health > 0
+                                    
+                                    -- 傳送到紅門並等待0.5秒
+                                    pcall(function()
+                                        local teleport1 = Workspace.Lobby:FindFirstChild("Teleport1")
+                                        if teleport1 and newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") then
+                                            newCharacter.HumanoidRootPart.CFrame = teleport1.CFrame
+                                            task.wait(0.5)
+                                        end
+                                    end)
+                                    
+                                    -- 重新找到目標並移動
+                                    pcall(function()
                                         local targetPlayer = game:GetService("Players"):FindFirstChild(targetName)
                                         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
                                             local targetPos = targetPlayer.Character.HumanoidRootPart.Position
@@ -609,16 +616,20 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                             local newPos = targetPos + (targetLookDirection * 5)
                                             newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, targetPos)
                                         end
-                                    else
+                                    end)
+                                    
+                                    task.wait(0.3)
+                                else
+                                    -- 第三、四任務：不重置，繼續移動到目標位置
+                                    task.wait(0.1)
+                                    pcall(function()
                                         local newTargetGlove = findTargetGlove(targetName)
-                                        if newTargetGlove and newTargetGlove.Parent then
+                                        if newTargetGlove and newTargetGlove.Parent and humanoidRootPart and humanoidRootPart.Parent then
                                             local glovePos = newTargetGlove.Position
-                                            newCharacter.HumanoidRootPart.CFrame = CFrame.new(glovePos)
+                                            humanoidRootPart.CFrame = CFrame.new(glovePos)
                                         end
-                                    end
-                                end)
-                                
-                                task.wait(0.3)
+                                    end)
+                                end
                                 break
                             end
                             
@@ -672,27 +683,19 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                     
                                     -- 重新找到目標並移動
                                     pcall(function()
-                                        if cherryHelpMode == "第一、二任務" then
-                                            local targetPlayer = game:GetService("Players"):FindFirstChild(targetName)
-                                            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                                local targetPos = targetPlayer.Character.HumanoidRootPart.Position
-                                                local targetLookDirection = targetPlayer.Character.HumanoidRootPart.CFrame.LookVector
-                                                local newPos = targetPos + (targetLookDirection * 5)
-                                                newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, targetPos)
-                                            end
-                                        else
-                                            local newTargetGlove = findTargetGlove(targetName)
-                                            if newTargetGlove and newTargetGlove.Parent then
-                                                local glovePos = newTargetGlove.Position
-                                                newCharacter.HumanoidRootPart.CFrame = CFrame.new(glovePos)
-                                            end
+                                        local targetPlayer = game:GetService("Players"):FindFirstChild(targetName)
+                                        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                            local targetPos = targetPlayer.Character.HumanoidRootPart.Position
+                                            local targetLookDirection = targetPlayer.Character.HumanoidRootPart.CFrame.LookVector
+                                            local newPos = targetPos + (targetLookDirection * 5)
+                                            newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, targetPos)
                                         end
                                     end)
                                     
                                     task.wait(0.3)
                                     break
                                 else
-                                    -- 第三、四任務 - 持續跟隨
+                                    -- 第三、四任務 - 持續跟隨，不重置
                                     isCherryMovingLocked = true
                                     
                                     while isCherryHelpEnabled and isCherryMovingLocked do
@@ -743,6 +746,7 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                         humanoidRootPart.CFrame = CFrame.new(newPos, targetPos)
                                     end
                                 else
+                                    -- 第三、四任務：直接移動到手套位置，不偏移
                                     local targetPos = targetObject.Position
                                     
                                     if (humanoidRootPart.Position - targetPos).Magnitude > 1 then
