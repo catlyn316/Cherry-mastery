@@ -288,7 +288,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                     game:GetService("ReplicatedStorage").GeneralAbility:FireServer()
                 end)
                 
-                -- 每1秒執行分身攻擊（統一間隔）
+                -- 每0.7秒執行分身攻擊（統一間隔）
                 local startTime = tick()
                 while isCherryAutoEnabled and (tick() - startTime < 5) do
                     pcall(function()
@@ -302,10 +302,10 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                             end
                         end
                     end)
-                    task.wait(1) -- 分身攻擊間隔改為1秒
+                    task.wait(0.7) -- 分身攻擊間隔改為0.7秒
                 end
                 
-                -- 每1秒攻擊7單位內最近玩家
+                -- 每0.7秒攻擊7單位內最近玩家
                 task.spawn(function()
                     while isCherryAutoEnabled do
                         pcall(function()
@@ -334,7 +334,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                                 game:GetService("ReplicatedStorage").GeneralHit:FireServer(unpack(args))
                             end
                         end)
-                        task.wait(1)
+                        task.wait(0.7)
                     end
                 end)
                 
