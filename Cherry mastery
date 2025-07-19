@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.08"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.07"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -266,6 +266,7 @@ styleScrollFrame(cherrySection)
 -- 櫻桃功能變數
 local isCherryAutoEnabled = false
 local cherryAutoLoop = nil
+local cherryAutoMode = "製造分身+讓分身攻擊" -- 預設模式
 local isCherryHelpEnabled = false
 local cherryHelpLoop = nil
 local cherryHelpMode = "第一、二任務" -- 預設模式
@@ -275,70 +276,131 @@ local isCherryMovingLocked = false
 -- 創建自動使用櫻桃能力按鈕
 local cherryAutoBtn = createButton("自動使用能力: 關", 1, cherrySection, 50)
 
--- 自動使用櫻桃能力按鈕功能
+-- 創建攻擊模式下拉選單 (自動使用櫻桃能力)
+local cherryModeDropdown = Instance.new("TextButton", cherrySection)
+cherryModeDropdown.Size = UDim2.new(0, 180, 0, 25)
+cherryModeDropdown.Position = UDim2.new(0.5, -90, 0, 55)
+cherryModeDropdown.Text = "模式: " .. cherryAutoMode
+cherryModeDropdown.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+cherryModeDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+cherryModeDropdown.TextSize = 14
+cherryModeDropdown.Font = Enum.Font.Gotham
+cherryModeDropdown.BorderSizePixel = 0
+Instance.new("UICorner", cherryModeDropdown).CornerRadius = UDim.new(0, 6)
+
+-- 攻擊模式選項框架
+local cherryModeOptions = Instance.new("Frame", cherrySection)
+cherryModeOptions.Size = UDim2.new(0, 180, 0, 60)
+cherryModeOptions.Position = UDim2.new(0.5, -90, 0, 80)
+cherryModeOptions.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+cherryModeOptions.BorderSizePixel = 0
+cherryModeOptions.Visible = false
+Instance.new("UICorner", cherryModeOptions).CornerRadius = UDim.new(0, 6)
+
+-- 製造分身+讓分身攻擊模式選項
+local cloneOption = Instance.new("TextButton", cherryModeOptions)
+cloneOption.Size = UDim2.new(1, 0, 0.5, 0)
+cloneOption.Position = UDim2.new(0, 0, 0, 0)
+cloneOption.Text = "製造分身+讓分身攻擊"
+cloneOption.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+cloneOption.TextColor3 = Color3.fromRGB(255, 255, 255)
+cloneOption.TextSize = 12
+cloneOption.Font = Enum.Font.Gotham
+cloneOption.BorderSizePixel = 0
+
+-- 本體攻擊模式選項
+local bodyOption = Instance.new("TextButton", cherryModeOptions)
+bodyOption.Size = UDim2.new(1, 0, 0.5, 0)
+bodyOption.Position = UDim2.new(0, 0, 0.5, 0)
+bodyOption.Text = "本體攻擊"
+bodyOption.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+bodyOption.TextColor3 = Color3.fromRGB(255, 255, 255)
+bodyOption.TextSize = 12
+bodyOption.Font = Enum.Font.Gotham
+bodyOption.BorderSizePixel = 0
+
+-- 攻擊模式下拉選單功能
+cherryModeDropdown.MouseButton1Click:Connect(function()
+    cherryModeOptions.Visible = not cherryModeOptions.Visible
+end)
+
+cloneOption.MouseButton1Click:Connect(function()
+    cherryAutoMode = "製造分身+讓分身攻擊"
+    cherryModeDropdown.Text = "模式: " .. cherryAutoMode
+    cherryModeOptions.Visible = false
+end)
+
+bodyOption.MouseButton1Click:Connect(function()
+    cherryAutoMode = "本體攻擊"
+    cherryModeDropdown.Text = "模式: " .. cherryAutoMode
+    cherryModeOptions.Visible = false
+end)
+
+-- 修改後的自動使用櫻桃能力按鈕功能
 cherryAutoBtn.MouseButton1Click:Connect(function()
     isCherryAutoEnabled = not isCherryAutoEnabled
     cherryAutoBtn.Text = isCherryAutoEnabled and "自動使用能力: 開" or "自動使用能力: 關"
     
     if isCherryAutoEnabled then
         cherryAutoLoop = task.spawn(function()
-            while isCherryAutoEnabled do
-                -- 執行櫻桃能力
-                pcall(function()
-                    game:GetService("ReplicatedStorage").GeneralAbility:FireServer()
-                end)
-                
-                -- 每0.7秒執行分身攻擊（統一間隔）
-                local startTime = tick()
-                while isCherryAutoEnabled and (tick() - startTime < 5) do
+            if cherryAutoMode == "製造分身+讓分身攻擊" then
+                -- 製造分身+讓分身攻擊模式
+                while isCherryAutoEnabled do
+                    -- 執行櫻桃能力
                     pcall(function()
-                        local cherryStorage = workspace:FindFirstChild("cherry_storage")
-                        if cherryStorage then
-                            -- 找到所有櫻桃分身並執行clone_remote
-                            for _, child in pairs(cherryStorage:GetChildren()) do
-                                if child.Name == "Cherry " .. LocalPlayer.Name and child:FindFirstChild("clone_remote") then
-                                    child.clone_remote:FireServer()
-                                end
-                            end
-                        end
+                        game:GetService("ReplicatedStorage").GeneralAbility:FireServer()
                     end)
-                    task.wait(0.7) -- 分身攻擊間隔改為0.7秒
-                end
-                
-                -- 每0.7秒攻擊7單位內最近玩家
-                task.spawn(function()
-                    while isCherryAutoEnabled do
+                    
+                    -- 每0.7秒執行分身攻擊（統一間隔）
+                    local startTime = tick()
+                    while isCherryAutoEnabled and (tick() - startTime < 5) do
                         pcall(function()
-                            -- 找到5單位內最近的玩家
-                            local nearestPlayer = nil
-                            local nearestDistance = math.huge
-                            local myCharacter = LocalPlayer.Character
-                            
-                            if myCharacter and myCharacter:FindFirstChild("HumanoidRootPart") then
-                                for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-                                    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                                        local distance = (myCharacter.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                        -- 只攻擊7單位內的玩家
-                                        if distance <= 7 and distance < nearestDistance then
-                                            nearestDistance = distance
-                                            nearestPlayer = player
-                                        end
+                            local cherryStorage = workspace:FindFirstChild("cherry_storage")
+                            if cherryStorage then
+                                -- 找到所有櫻桃分身並執行clone_remote
+                                for _, child in pairs(cherryStorage:GetChildren()) do
+                                    if child.Name == "Cherry " .. LocalPlayer.Name and child:FindFirstChild("clone_remote") then
+                                        child.clone_remote:FireServer()
                                     end
                                 end
                             end
-                            
-                            if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("Torso") then
-                                local args = {
-                                    [1] = nearestPlayer.Character.Torso
-                                }
-                                game:GetService("ReplicatedStorage").GeneralHit:FireServer(unpack(args))
-                            end
                         end)
-                        task.wait(0.7)
+                        task.wait(0.7) -- 分身攻擊間隔改為0.7秒
                     end
-                end)
-                
-                if not isCherryAutoEnabled then break end
+                    
+                    if not isCherryAutoEnabled then break end
+                end
+            else
+                -- 本體攻擊模式
+                while isCherryAutoEnabled do
+                    pcall(function()
+                        -- 找到7單位內最近的玩家
+                        local nearestPlayer = nil
+                        local nearestDistance = math.huge
+                        local myCharacter = LocalPlayer.Character
+                        
+                        if myCharacter and myCharacter:FindFirstChild("HumanoidRootPart") then
+                            for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                                    local distance = (myCharacter.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                                    -- 只攻擊7單位內的玩家
+                                    if distance <= 7 and distance < nearestDistance then
+                                        nearestDistance = distance
+                                        nearestPlayer = player
+                                    end
+                                end
+                            end
+                        end
+                        
+                        if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("Torso") then
+                            local args = {
+                                [1] = nearestPlayer.Character.Torso
+                            }
+                            game:GetService("ReplicatedStorage").GeneralHit:FireServer(unpack(args))
+                        end
+                    end)
+                    task.wait(0.7) -- 本體攻擊間隔0.7秒
+                end
             end
         end)
     elseif cherryAutoLoop then
