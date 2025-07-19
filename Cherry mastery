@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.1"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -288,7 +288,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                     game:GetService("ReplicatedStorage").GeneralAbility:FireServer()
                 end)
                 
-                -- 每0.7秒執行分身攻擊（統一間隔）
+                -- 每0.8秒執行分身攻擊
                 local startTime = tick()
                 while isCherryAutoEnabled and (tick() - startTime < 5) do
                     pcall(function()
@@ -302,41 +302,8 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                             end
                         end
                     end)
-                    task.wait(0.7) -- 分身攻擊間隔改為0.7秒
+                    task.wait(0.8) -- 分身攻擊間隔改為0.8秒
                 end
-                
-                -- 每0.7秒攻擊7單位內最近玩家
-                task.spawn(function()
-                    while isCherryAutoEnabled do
-                        pcall(function()
-                            -- 找到5單位內最近的玩家
-                            local nearestPlayer = nil
-                            local nearestDistance = math.huge
-                            local myCharacter = LocalPlayer.Character
-                            
-                            if myCharacter and myCharacter:FindFirstChild("HumanoidRootPart") then
-                                for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-                                    if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                                        local distance = (myCharacter.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                        -- 只攻擊7單位內的玩家
-                                        if distance <= 7 and distance < nearestDistance then
-                                            nearestDistance = distance
-                                            nearestPlayer = player
-                                        end
-                                    end
-                                end
-                            end
-                            
-                            if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("Torso") then
-                                local args = {
-                                    [1] = nearestPlayer.Character.Torso
-                                }
-                                game:GetService("ReplicatedStorage").GeneralHit:FireServer(unpack(args))
-                            end
-                        end)
-                        task.wait(0.7)
-                    end
-                end)
                 
                 if not isCherryAutoEnabled then break end
             end
@@ -497,11 +464,13 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                 end
                 
                 pcall(function()
-                    -- 傳送到 Lobby.Teleport1
-                    local teleport1 = Workspace.Lobby:FindFirstChild("Teleport1")
-                    if teleport1 and isCherryHelpEnabled then
-                        humanoidRootPart.CFrame = teleport1.CFrame
-                        task.wait(0.3)
+                    -- 只有第一、二任務才傳送到 Lobby.Teleport1
+                    if cherryHelpMode == "第一、二任務" then
+                        local teleport1 = Workspace.Lobby:FindFirstChild("Teleport1")
+                        if teleport1 and isCherryHelpEnabled then
+                            humanoidRootPart.CFrame = teleport1.CFrame
+                            task.wait(0.3)
+                        end
                     end
                     
                     local targetObject = nil
@@ -613,7 +582,7 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                     
                                     task.wait(0.3)
                                 else
-                                    -- 第三、四任務：不重置，繼續移動到目標位置
+                                    -- 第三、四任務：不重置，直接繼續移動到目標位置
                                     task.wait(0.1)
                                     pcall(function()
                                         local newTargetGlove = findTargetGlove(targetName)
@@ -622,8 +591,13 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                             humanoidRootPart.CFrame = CFrame.new(glovePos)
                                         end
                                     end)
+                                    -- 繼續移動循環，不break
                                 end
-                                break
+                                
+                                -- 只有第一、二任務才break，第三、四任務繼續循環
+                                if cherryHelpMode == "第一、二任務" then
+                                    break
+                                end
                             end
                             
                             -- 檢查是否被打中 (如果有LastSlappedBy系統)
@@ -688,24 +662,16 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                     task.wait(0.3)
                                     break
                                 else
-                                    -- 第三、四任務 - 持續跟隨，不重置
-                                    isCherryMovingLocked = true
-                                    
-                                    while isCherryHelpEnabled and isCherryMovingLocked do
-                                        pcall(function()
-                                            local targetGlove = findTargetGlove(targetName)
-                                            
-                                            if targetGlove and targetGlove.Parent then
-                                                local glovePos = targetGlove.Position
-                                                
-                                                if humanoidRootPart and humanoidRootPart.Parent then
-                                                    humanoidRootPart.CFrame = CFrame.new(glovePos)
-                                                end
-                                            end
-                                        end)
-                                        -- 第三、四任務間隔時間為0，直接繼續
-                                    end
-                                    break
+                                    -- 第三、四任務 - 被打到後直接繼續移動到手套位置，不進行重置流程
+                                    task.wait(0.1)
+                                    pcall(function()
+                                        local targetGlove = findTargetGlove(targetName)
+                                        if targetGlove and targetGlove.Parent and humanoidRootPart and humanoidRootPart.Parent then
+                                            local glovePos = targetGlove.Position
+                                            humanoidRootPart.CFrame = CFrame.new(glovePos)
+                                        end
+                                    end)
+                                    -- 繼續移動循環，不break
                                 end
                             end
                             
