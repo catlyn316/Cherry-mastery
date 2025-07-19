@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.08"
+Title.Text = "✨ 貓玲的腳本區 ✨"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -228,7 +228,6 @@ local function createButton(text, order, parent, spacing)
     return btn
 end
 
-
 -- 添加滾動框樣式改善
 local function styleScrollFrame(scrollFrame)
     scrollFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
@@ -244,12 +243,6 @@ local function styleScrollFrame(scrollFrame)
     Instance.new("UICorner", scrollFrame).CornerRadius = UDim.new(0, 8)
 end
 
-
-
-Section6.MouseButton1Click:Connect(function()
-    barrierSection.Visible = false
-    cherrySection.Visible = true
-end)
 
 -- 櫻桃精通分區腳本
 
