@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.1"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.2"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -461,9 +461,20 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                         for _, child in pairs(cherryStorage:GetChildren()) do
                             if child.Name == "Cherry " .. targetName then
                                 targetCherry = child
-                                break
+                                break -- 鎖定列表中的第一個
                             end
                         end
+                    end
+                    
+                    -- 在找到櫻桃後立即移動到櫻桃面前
+                    if targetCherry and isCherryHelpEnabled then
+                        pcall(function()
+                            local cherryPos = targetCherry.Position
+                            local cherryLookDirection = targetCherry.CFrame.LookVector
+                            local newPos = cherryPos + (cherryLookDirection * 5)
+                            humanoidRootPart.CFrame = CFrame.new(newPos, cherryPos)
+                        end)
+                        task.wait(0.2) -- 等待移動完成
                     end
                     
                     if targetCherry and isCherryHelpEnabled then
@@ -523,12 +534,24 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                     end
                                 end)
                                 
-                                -- 移動到目標櫻桃面前5單位
+                                -- 重新找到目標櫻桃並移動到櫻桃面前5單位
                                 pcall(function()
-                                    if targetCherry and targetCherry.Parent and 
+                                    local cherryStorage = workspace:FindFirstChild("cherry_storage")
+                                    local newTargetCherry = nil
+                                    
+                                    if cherryStorage then
+                                        for _, child in pairs(cherryStorage:GetChildren()) do
+                                            if child.Name == "Cherry " .. targetName then
+                                                newTargetCherry = child
+                                                break -- 鎖定列表中的第一個
+                                            end
+                                        end
+                                    end
+                                    
+                                    if newTargetCherry and newTargetCherry.Parent and 
                                        newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") then
-                                        local cherryPos = targetCherry.Position
-                                        local cherryLookDirection = targetCherry.CFrame.LookVector
+                                        local cherryPos = newTargetCherry.Position
+                                        local cherryLookDirection = newTargetCherry.CFrame.LookVector
                                         local newPos = cherryPos + (cherryLookDirection * 5)
                                         newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, cherryPos)
                                     end
@@ -586,11 +609,24 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                         end
                                     end)
                                     
+                                    -- 重新找到目標櫻桃並移動到櫻桃面前
                                     pcall(function()
-                                        if targetCherry and targetCherry.Parent and 
+                                        local cherryStorage = workspace:FindFirstChild("cherry_storage")
+                                        local newTargetCherry = nil
+                                        
+                                        if cherryStorage then
+                                            for _, child in pairs(cherryStorage:GetChildren()) do
+                                                if child.Name == "Cherry " .. targetName then
+                                                    newTargetCherry = child
+                                                    break -- 鎖定列表中的第一個
+                                                end
+                                            end
+                                        end
+                                        
+                                        if newTargetCherry and newTargetCherry.Parent and 
                                            newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") then
-                                            local cherryPos = targetCherry.Position
-                                            local cherryLookDirection = targetCherry.CFrame.LookVector
+                                            local cherryPos = newTargetCherry.Position
+                                            local cherryLookDirection = newTargetCherry.CFrame.LookVector
                                             local newPos = cherryPos + (cherryLookDirection * 5)
                                             newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, cherryPos)
                                         end
@@ -674,3 +710,4 @@ Section6.MouseButton1Click:Connect(function()
     barrierSection.Visible = false
     cherrySection.Visible = true
 end)
+
