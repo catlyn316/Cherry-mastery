@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.3"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.4"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -412,6 +412,24 @@ local function isInRagdoll(character)
            humanoid.PlatformStand == true
 end
 
+-- 尋找目標手套的函數
+local function findTargetGlove(targetName)
+    local cherryStorage = workspace:FindFirstChild("cherry_storage")
+    if not cherryStorage then return nil end
+    
+    -- 遍歷所有櫻桃尋找包含目標名稱的手套
+    for _, child in pairs(cherryStorage:GetChildren()) do
+        if child.Name:find(targetName) and child:FindFirstChild("Cherry") then
+            local cherry = child.Cherry
+            if cherry:FindFirstChild("Glove") then
+                return cherry.Glove
+            end
+        end
+    end
+    
+    return nil
+end
+
 -- 櫻桃幫助模式功能
 cherryHelpBtn.MouseButton1Click:Connect(function()
     isCherryHelpEnabled = not isCherryHelpEnabled
@@ -453,29 +471,19 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                         task.wait(0.3)
                     end
                     
-                    -- 找到目標櫻桃手套
-                    local cherryStorage = workspace:FindFirstChild("cherry_storage")
-                    local targetGlove = nil
+                    -- 找到目標櫻桃手套（確保路徑包含目標名稱）
+                    local targetGlove = findTargetGlove(targetName)
                     
-                    if cherryStorage and #cherryStorage:GetChildren() > 0 then
-                        local firstCherry = cherryStorage:GetChildren()[1]
-                        if firstCherry and firstCherry:FindFirstChild("Cherry") and firstCherry.Cherry:FindFirstChild("Glove") then
-                            targetGlove = firstCherry.Cherry.Glove
-                        end
-                    end
-                    
-                    -- 在找到手套後立即移動到手套面前
+                    -- 在找到手套後立即移動到手套位置（不偏移）
                     if targetGlove and isCherryHelpEnabled then
                         pcall(function()
                             local glovePos = targetGlove.Position
-                            local gloveLookDirection = targetGlove.CFrame.LookVector
-                            local newPos = glovePos + (gloveLookDirection * 5)
-                            humanoidRootPart.CFrame = CFrame.new(newPos, glovePos)
+                            humanoidRootPart.CFrame = CFrame.new(glovePos)
                         end)
                         task.wait(0.2) -- 等待移動完成
                     end
                     
-                    if targetCherry and isCherryHelpEnabled then
+                    if targetGlove and isCherryHelpEnabled then
                         local playerWorkspaceFolder = Workspace:FindFirstChild(LocalPlayer.Name)
                         local lastUpdateTime = tick()
                         
@@ -532,24 +540,14 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                     end
                                 end)
                                 
-                                -- 重新找到目標手套並移動到手套面前5單位
+                                -- 重新找到目標手套並移動到手套位置（不偏移）
                                 pcall(function()
-                                    local cherryStorage = workspace:FindFirstChild("cherry_storage")
-                                    local newTargetGlove = nil
-                                    
-                                    if cherryStorage and #cherryStorage:GetChildren() > 0 then
-                                        local firstCherry = cherryStorage:GetChildren()[1]
-                                        if firstCherry and firstCherry:FindFirstChild("Cherry") and firstCherry.Cherry:FindFirstChild("Glove") then
-                                            newTargetGlove = firstCherry.Cherry.Glove
-                                        end
-                                    end
+                                    local newTargetGlove = findTargetGlove(targetName)
                                     
                                     if newTargetGlove and newTargetGlove.Parent and 
                                        newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") then
                                         local glovePos = newTargetGlove.Position
-                                        local gloveLookDirection = newTargetGlove.CFrame.LookVector
-                                        local newPos = glovePos + (gloveLookDirection * 5)
-                                        newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, glovePos)
+                                        newCharacter.HumanoidRootPart.CFrame = CFrame.new(glovePos)
                                     end
                                 end)
                                 
@@ -605,24 +603,14 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                         end
                                     end)
                                     
-                                    -- 重新找到目標手套並移動到手套面前
+                                    -- 重新找到目標手套並移動到手套位置（不偏移）
                                     pcall(function()
-                                        local cherryStorage = workspace:FindFirstChild("cherry_storage")
-                                        local newTargetGlove = nil
-                                        
-                                        if cherryStorage and #cherryStorage:GetChildren() > 0 then
-                                            local firstCherry = cherryStorage:GetChildren()[1]
-                                            if firstCherry and firstCherry:FindFirstChild("Cherry") and firstCherry.Cherry:FindFirstChild("Glove") then
-                                                newTargetGlove = firstCherry.Cherry.Glove
-                                            end
-                                        end
+                                        local newTargetGlove = findTargetGlove(targetName)
                                         
                                         if newTargetGlove and newTargetGlove.Parent and 
                                            newCharacter and newCharacter:FindFirstChild("HumanoidRootPart") then
                                             local glovePos = newTargetGlove.Position
-                                            local gloveLookDirection = newTargetGlove.CFrame.LookVector
-                                            local newPos = glovePos + (gloveLookDirection * 5)
-                                            newCharacter.HumanoidRootPart.CFrame = CFrame.new(newPos, glovePos)
+                                            newCharacter.HumanoidRootPart.CFrame = CFrame.new(glovePos)
                                         end
                                     end)
                                     
@@ -634,23 +622,13 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                                     
                                     while isCherryHelpEnabled and isCherryMovingLocked do
                                         pcall(function()
-                                            local cherryStorage = workspace:FindFirstChild("cherry_storage")
-                                            local targetGlove = nil
-                                            
-                                            if cherryStorage and #cherryStorage:GetChildren() > 0 then
-                                                local firstCherry = cherryStorage:GetChildren()[1]
-                                                if firstCherry and firstCherry:FindFirstChild("Cherry") and firstCherry.Cherry:FindFirstChild("Glove") then
-                                                    targetGlove = firstCherry.Cherry.Glove
-                                                end
-                                            end
+                                            local targetGlove = findTargetGlove(targetName)
                                             
                                             if targetGlove and targetGlove.Parent then
                                                 local glovePos = targetGlove.Position
-                                                local gloveLookDirection = targetGlove.CFrame.LookVector
-                                                local newPos = glovePos + (gloveLookDirection * 5)
                                                 
                                                 if humanoidRootPart and humanoidRootPart.Parent then
-                                                    humanoidRootPart.CFrame = CFrame.new(newPos, glovePos)
+                                                    humanoidRootPart.CFrame = CFrame.new(glovePos)
                                                 end
                                             end
                                         end)
@@ -667,18 +645,19 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                             end
                             lastUpdateTime = currentTime
                             
+                            -- 重新尋找目標手套
+                            targetGlove = findTargetGlove(targetName)
+                            
                             if not (targetGlove and targetGlove.Parent) then
                                 break
                             end
                             
-                            -- 持續移動到手套面前
+                            -- 持續移動到手套位置（不偏移）
                             pcall(function()
                                 local glovePos = targetGlove.Position
-                                local gloveLookDirection = targetGlove.CFrame.LookVector
-                                local newPos = glovePos + (gloveLookDirection * 5)
                                 
-                                if (humanoidRootPart.Position - newPos).Magnitude > 1 then
-                                    humanoidRootPart.CFrame = CFrame.new(newPos, glovePos)
+                                if (humanoidRootPart.Position - glovePos).Magnitude > 1 then
+                                    humanoidRootPart.CFrame = CFrame.new(glovePos)
                                 end
                             end)
                             
