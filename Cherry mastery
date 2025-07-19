@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨v0.06"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.07"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -306,7 +306,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                     task.wait(0.5)
                 end
                 
-                -- 每0.6秒攻擊5單位內最近玩家
+                -- 每0.6秒攻擊7單位內最近玩家
                 task.spawn(function()
                     while isCherryAutoEnabled do
                         pcall(function()
@@ -319,8 +319,8 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                                 for _, player in pairs(game:GetService("Players"):GetPlayers()) do
                                     if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                                         local distance = (myCharacter.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                        -- 只攻擊5單位內的玩家
-                                        if distance <= 5 and distance < nearestDistance then
+                                        -- 只攻擊7單位內的玩家
+                                        if distance <= 7 and distance < nearestDistance then
                                             nearestDistance = distance
                                             nearestPlayer = player
                                         end
