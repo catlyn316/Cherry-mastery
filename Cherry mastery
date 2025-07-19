@@ -244,7 +244,7 @@ local function styleScrollFrame(scrollFrame)
     Instance.new("UICorner", scrollFrame).CornerRadius = UDim.new(0, 8)
 end
 
-- 櫻桃精通分區腳本
+-- 櫻桃精通分區腳本
 
 -- 創建櫻桃分區按鈕
 local Section6 = createSectionButton("櫻桃精通", 2, SideBar)
