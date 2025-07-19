@@ -37,7 +37,7 @@ local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, -80, 0, 50)
 Title.Position = UDim2.new(0, 15, 0, 0)  -- 往上移動5像素原為5
 Title.BackgroundTransparency = 1
-Title.Text = "✨ 貓玲的腳本區 ✨"
+Title.Text = "✨ 貓玲的腳本區 ✨v0.1"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -247,7 +247,7 @@ end
 -- 櫻桃精通分區腳本
 
 -- 創建櫻桃分區按鈕
-local Section6 = createSectionButton("櫻桃精通", 1, SideBar)
+local Section6 = createSectionButton("櫻桃精通", 2, SideBar)
 
 -- 創建櫻桃分區的ScrollingFrame
 local cherrySection = Instance.new("ScrollingFrame", Content)
@@ -296,7 +296,7 @@ cherryAutoBtn.MouseButton1Click:Connect(function()
                         if cherryStorage then
                             -- 找到所有櫻桃分身並執行clone_remote
                             for _, child in pairs(cherryStorage:GetChildren()) do
-                                if child.Name == "Cherry meowkithelper" and child:FindFirstChild("clone_remote") then
+                                if child.Name == "Cherry " .. LocalPlayer.Name and child:FindFirstChild("clone_remote") then
                                     child.clone_remote:FireServer()
                                 end
                             end
@@ -459,13 +459,9 @@ cherryHelpBtn.MouseButton1Click:Connect(function()
                     
                     if cherryStorage then
                         for _, child in pairs(cherryStorage:GetChildren()) do
-                            if child.Name == "Cherry meowkithelper" then
-                                -- 檢查這個櫻桃是否屬於目標玩家
-                                local ownerValue = child:FindFirstChild("Owner")
-                                if ownerValue and ownerValue.Value == targetName then
-                                    targetCherry = child
-                                    break
-                                end
+                            if child.Name == "Cherry " .. targetName then
+                                targetCherry = child
+                                break
                             end
                         end
                     end
